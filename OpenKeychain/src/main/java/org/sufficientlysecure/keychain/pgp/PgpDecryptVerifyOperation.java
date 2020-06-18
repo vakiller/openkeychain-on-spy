@@ -333,6 +333,7 @@ public class PgpDecryptVerifyOperation extends BaseOperation<PgpDecryptVerifyInp
         DecryptVerifySecurityProblemBuilder securityProblemBuilder = new DecryptVerifySecurityProblemBuilder();
         { // resolve encrypted (symmetric and asymmetric) packets
             JcaSkipMarkerPGPObjectFactory pgpF = new JcaSkipMarkerPGPObjectFactory(in);
+            // JcaSkipMarkerPGPObjectFactory Tạo một nhà máy đối tượng phù hợp để đọc các đối tượng PGP như khóa, vòng khóa và bộ sưu tập vòng khóa hoặc dữ liệu được mã hóa PGP.
             Object obj = pgpF.nextObject();
 
             if (obj instanceof PGPEncryptedDataList) {
@@ -366,7 +367,7 @@ public class PgpDecryptVerifyOperation extends BaseOperation<PgpDecryptVerifyInp
                     securityProblemBuilder.addSymmetricSecurityProblem(symmetricSecurityProblem);
                     decryptionResultBuilder.setInsecure(true);
                 }
-
+                //read data with esResult
                 plainFact = new JcaSkipMarkerPGPObjectFactory(esResult.cleartextStream);
                 dataChunk = plainFact.nextObject();
 
@@ -602,7 +603,9 @@ public class PgpDecryptVerifyOperation extends BaseOperation<PgpDecryptVerifyInp
         boolean decryptedSessionKeyAvailable = false;
 
         PGPPublicKeyEncryptedData encryptedDataAsymmetric = null;
+        // dữ liệu mã hoá bất đối xứng
         PGPPBEEncryptedData encryptedDataSymmetric = null;
+        // dữ liệu mã hoá đối xứng
         CanonicalizedSecretKey decryptionKey = null;
         CachingDataDecryptorFactory cachedKeyDecryptorFactory = new CachingDataDecryptorFactory(
                 Constants.BOUNCY_CASTLE_PROVIDER_NAME, cryptoInput.getCryptoData());
@@ -614,11 +617,14 @@ public class PgpDecryptVerifyOperation extends BaseOperation<PgpDecryptVerifyInp
         RequireAnyDecryptPassphraseBuilder requirePassphraseBuilder = new RequireAnyDecryptPassphraseBuilder();
 
         // go through all objects and find one we can decrypt
+
+        // it mounted encrypted data objects then us next for get object inside it until there nothing to mount
         while (it.hasNext()) {
             Object obj = it.next();
             if (obj instanceof PGPPublicKeyEncryptedData) {
+                // because object instanceoOf PGPPublicKeyEncryptedData so we will get key for encrypted data
                 anyPacketFound = true;
-
+                // make encData become PGPPublicKeyEncryptedData
                 PGPPublicKeyEncryptedData encData = (PGPPublicKeyEncryptedData) obj;
                 long subKeyId = encData.getKeyID();
 
@@ -663,6 +669,8 @@ public class PgpDecryptVerifyOperation extends BaseOperation<PgpDecryptVerifyInp
                     }
 
                     // get actual subkey which has been used for this encryption packet
+
+                    // GET KEY HERE IF HAS PASSPHASE RETURN TO ENTER PASSWORD
                     CanonicalizedSecretKeyRing canonicalizedSecretKeyRing = mKeyRepository
                             .getCanonicalizedSecretKeyRing(masterKeyId);
                     CanonicalizedSecretKey candidateDecryptionKey = canonicalizedSecretKeyRing.getSecretKey(subKeyId);
@@ -680,12 +688,13 @@ public class PgpDecryptVerifyOperation extends BaseOperation<PgpDecryptVerifyInp
                         passphrase = cryptoInput.getPassphrase();
                     } else {
                         // if no passphrase was explicitly set try to get it from the cache service
+                        // ENTER PASSPHRASE HERE
                         try {
-                            // returns "" if key has no passphrase
                             passphrase = getCachedPassphrase(subKeyId);
                             log.add(LogType.MSG_DC_PASS_CACHED, indent + 1);
                         } catch (PassphraseCacheInterface.NoSecretKeyException e) {
                             log.add(LogType.MSG_DC_ERROR_NO_KEY, indent + 1);
+                            // returns "" if key has no passphrase
                             return result.with(new DecryptVerifyResult(DecryptVerifyResult.RESULT_ERROR, log));
                         }
 

@@ -317,7 +317,7 @@ public class PgpSignEncryptOperation extends BaseOperation<PgpSignEncryptInputPa
             if (symmetricEncryptionAlgorithm == OpenKeychainSymmetricKeyAlgorithmTags.USE_DEFAULT) {
                 symmetricEncryptionAlgorithm = PgpSecurityConstants.DEFAULT_SYMMETRIC_ALGORITHM;
             }
-            JcePGPDataEncryptorBuilder encryptorBuilder =
+                JcePGPDataEncryptorBuilder encryptorBuilder =
                     new JcePGPDataEncryptorBuilder(symmetricEncryptionAlgorithm)
                             .setProvider(Constants.BOUNCY_CASTLE_PROVIDER_NAME)
                             .setWithIntegrityPacket(true);
