@@ -1,0 +1,98 @@
+{
+  "project_info": {
+    "project_number": "716685087902",
+    "firebase_url": "https://spyopenkeychain.firebaseio.com",
+    "project_id": "spyopenkeychain",
+    "storage_bucket": "spyopenkeychain.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:716685087902:android:06d08f8b950f769b64178f",
+        "android_client_info": {
+          "package_name": "org.sufficientlysecure.keychain"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "716685087902-9vga9h4jnre3j1slp195lrep3kgu6pmq.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCHhggt2xb-uvwLfVaQaSNm-yTUcqBiR74"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "716685087902-9vga9h4jnre3j1slp195lrep3kgu6pmq.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:716685087902:android:f50fdfd0a9a8bfa464178f",
+        "android_client_info": {
+          "package_name": "org.sufficientlysecure.keychain.debug"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "716685087902-9vga9h4jnre3j1slp195lrep3kgu6pmq.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCHhggt2xb-uvwLfVaQaSNm-yTUcqBiR74"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "716685087902-9vga9h4jnre3j1slp195lrep3kgu6pmq.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:716685087902:android:940fb19ce6d1ae5264178f",
+        "android_client_info": {
+          "package_name": "vn.vakiller.keychain"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "716685087902-9vga9h4jnre3j1slp195lrep3kgu6pmq.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCHhggt2xb-uvwLfVaQaSNm-yTUcqBiR74"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "716685087902-9vga9h4jnre3j1slp195lrep3kgu6pmq.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
