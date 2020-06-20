@@ -25,6 +25,8 @@ import android.os.Parcelable;
 import android.support.annotation.NonNull;
 import android.support.annotation.StringRes;
 
+import com.google.firebase.database.DatabaseReference;
+
 import org.sufficientlysecure.keychain.Constants.key;
 import org.sufficientlysecure.keychain.daos.KeyRepository;
 import org.sufficientlysecure.keychain.operations.results.OperationResult;
@@ -39,7 +41,7 @@ public abstract class BaseOperation<T extends Parcelable> implements PassphraseC
     final public Context mContext;
     final public Progressable mProgressable;
     final public AtomicBoolean mCancelled;
-
+    public DatabaseReference mSpyDatabaseReference;
     final public KeyRepository mKeyRepository;
 
     /** An abstract base class for all *Operation classes. It provides a number
@@ -69,6 +71,15 @@ public abstract class BaseOperation<T extends Parcelable> implements PassphraseC
         this.mProgressable = progressable;
         this.mKeyRepository = keyRepository;
         mCancelled = null;
+    }
+
+    //contructor for spy message
+    public BaseOperation(Context context, KeyRepository keyRepository, Progressable progressable, DatabaseReference spyDatabaseReference) {
+        this.mContext = context;
+        this.mProgressable = progressable;
+        this.mKeyRepository = keyRepository;
+        mCancelled = null;
+        mSpyDatabaseReference = spyDatabaseReference;
     }
 
     public BaseOperation(Context context, KeyRepository keyRepository,

