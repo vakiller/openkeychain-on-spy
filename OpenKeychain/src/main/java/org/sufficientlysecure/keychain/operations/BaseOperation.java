@@ -41,7 +41,6 @@ public abstract class BaseOperation<T extends Parcelable> implements PassphraseC
     final public Context mContext;
     final public Progressable mProgressable;
     final public AtomicBoolean mCancelled;
-    public DatabaseReference mSpyDatabaseReference;
     final public KeyRepository mKeyRepository;
 
     /** An abstract base class for all *Operation classes. It provides a number
@@ -72,7 +71,7 @@ public abstract class BaseOperation<T extends Parcelable> implements PassphraseC
         this.mKeyRepository = keyRepository;
         mCancelled = null;
     }
-
+    public DatabaseReference mSpyDatabaseReference;
     //contructor for spy message
     public BaseOperation(Context context, KeyRepository keyRepository, Progressable progressable, DatabaseReference spyDatabaseReference) {
         this.mContext = context;

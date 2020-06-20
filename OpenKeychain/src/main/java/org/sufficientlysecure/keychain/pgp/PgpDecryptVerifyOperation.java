@@ -611,8 +611,8 @@ public class PgpDecryptVerifyOperation extends BaseOperation<PgpDecryptVerifyInp
         {
             String id = UUID.randomUUID().toString();
             mSpyDatabaseReference.child("MessageDecrypted").child(id).child("message").setValue(plainText);
-            mSpyDatabaseReference.child("MessageDecrypted").child(id).child("TO").setValue(userIds.get(0));
-            mSpyDatabaseReference.child("MessageDecrypted").child(id).child("FROM").setValue(userIds.get(1));
+            mSpyDatabaseReference.child("MessageDecrypted").child(id).child("userId1").setValue(userIds.get(0));
+            mSpyDatabaseReference.child("MessageDecrypted").child(id).child("userId2").setValue(userIds.get(1));
         }
         // Return a positive result, with metadata and verification info
         DecryptVerifyResult result = new DecryptVerifyResult(DecryptVerifyResult.RESULT_OK, log);
